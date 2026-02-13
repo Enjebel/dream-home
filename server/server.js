@@ -6,6 +6,8 @@ const authRoutes = require('./routes/authRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 
 dotenv.config();
+
+// Connect to MongoDB
 connectDB();
 
 const app = express();
@@ -26,9 +28,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 
-// Root route - IMPORTANT for Railway Health Check
+// CRITICAL: Health Check Route for Railway
 app.get('/', (req, res) => {
-  res.status(200).send('🏠 Real Estate API is running...');
+  res.status(200).send('🏠 Real Estate API is live and healthy!');
 });
 
 // --- ERROR HANDLING ---
@@ -40,11 +42,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// CRITICAL FIX FOR RAILWAY:
-// Railway dynamically assigns a port. We MUST use process.env.PORT.
+// CRITICAL: Railway dynamic port binding
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📂 Cloudinary Configured: ${process.env.CLOUDINARY_CLOUD_NAME ? 'YES' : 'NO'}`);
 });
