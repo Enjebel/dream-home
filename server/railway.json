@@ -6,6 +6,9 @@
       "phases": {
         "install": {
           "cmds": ["npm install --legacy-peer-deps"]
+        },
+        "build": {
+          "cmds": ["echo 'Skipping build phase'"]
         }
       }
     },
