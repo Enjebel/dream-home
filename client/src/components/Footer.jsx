@@ -1,5 +1,6 @@
 import React from 'react';
-import { Home, Mail, Phone, Instagram, Twitter, Facebook, ArrowUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Home, Instagram, Twitter, Facebook, ArrowUp } from 'lucide-react';
 
 const Footer = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -26,10 +27,10 @@ const Footer = () => {
         <div>
           <h4 className="text-white font-bold mb-6">Explore</h4>
           <ul className="space-y-4 text-sm font-medium">
-            <li><a href="/" className="hover:text-blue-400 transition">Search Properties</a></li>
-            <li><a href="/register" className="hover:text-blue-400 transition">List Your Home</a></li>
-            <li><a href="#" className="hover:text-blue-400 transition">Agents</a></li>
-            <li><a href="#" className="hover:text-blue-400 transition">Reviews</a></li>
+            <li><Link to="/" className="hover:text-blue-400 transition">Search Properties</Link></li>
+            <li><Link to="/add-property" className="hover:text-blue-400 transition">List Your Home</Link></li>
+            <li><Link to="/agents" className="hover:text-blue-400 transition">Agents</Link></li>
+            <li><Link to="/reviews" className="hover:text-blue-400 transition">Reviews</Link></li>
           </ul>
         </div>
 
@@ -37,10 +38,10 @@ const Footer = () => {
         <div>
           <h4 className="text-white font-bold mb-6">Support</h4>
           <ul className="space-y-4 text-sm font-medium">
-            <li><a href="#" className="hover:text-blue-400 transition">Help Center</a></li>
-            <li><a href="#" className="hover:text-blue-400 transition">Terms of Service</a></li>
-            <li><a href="#" className="hover:text-blue-400 transition">Privacy Policy</a></li>
-            <li><a href="#" className="hover:text-blue-400 transition">Safety Center</a></li>
+            <li><Link to="/help" className="hover:text-blue-400 transition">Help Center</Link></li>
+            <li><Link to="/terms" className="hover:text-blue-400 transition">Terms of Service</Link></li>
+            <li><Link to="/privacy" className="hover:text-blue-400 transition">Privacy Policy</Link></li>
+            <li><Link to="/safety" className="hover:text-blue-400 transition">Safety Center</Link></li>
           </ul>
         </div>
 
@@ -48,21 +49,29 @@ const Footer = () => {
         <div>
           <h4 className="text-white font-bold mb-6">Stay Updated</h4>
           <div className="relative mb-4">
-            <input 
-              type="email" 
-              placeholder="Your email" 
-              className="w-full bg-slate-800 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-            />
+            <form onSubmit={(e) => e.preventDefault()}>
+              <input 
+                type="email" 
+                placeholder="Your email" 
+                className="w-full bg-slate-800 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-white"
+              />
+            </form>
           </div>
           <div className="flex gap-4">
-            <Instagram size={20} className="hover:text-white cursor-pointer" />
-            <Twitter size={20} className="hover:text-white cursor-pointer" />
-            <Facebook size={20} className="hover:text-white cursor-pointer" />
+            <a href="https://instagram.com" target="_blank" rel="noreferrer">
+                <Instagram size={20} className="hover:text-white cursor-pointer transition" />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noreferrer">
+                <Twitter size={20} className="hover:text-white cursor-pointer transition" />
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noreferrer">
+                <Facebook size={20} className="hover:text-white cursor-pointer transition" />
+            </a>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-800 flex flex-col md:row justify-between items-center gap-4">
         <p className="text-xs text-slate-500 font-medium">
           © 2026 DreamHome Real Estate. Built with passion for modern living.
         </p>
