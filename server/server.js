@@ -5,17 +5,12 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 
-// Load environment variables
 dotenv.config();
-
-// Connect to MongoDB
 connectDB();
 
 const app = express();
 
 // --- MIDDLEWARE ---
-
-// 1. CORS Configuration (UPDATED for Production)
 app.use(cors({ 
   origin: [
     'http://localhost:5173', 
@@ -24,19 +19,13 @@ app.use(cors({
   credentials: true 
 }));
 
-// 2. Body Parsers (Increased limits for image uploads)
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // --- ROUTES ---
-
-// Auth Routes (Login, Register, Profile)
 app.use('/api/auth', authRoutes);
-
-// Property Routes (Add, Get, Delete, My-Listings)
 app.use('/api/properties', propertyRoutes);
 
-// Root route for server health check (Railway requirement)
 app.get('/', (req, res) => {
   res.status(200).send('🏠 Real Estate API is running...');
 });
@@ -52,7 +41,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// '0.0.0.0' allows the server to accept connections from outside its container
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📂 Cloudinary Configured: ${process.env.CLOUDINARY_CLOUD_NAME ? 'YES' : 'NO'}`);

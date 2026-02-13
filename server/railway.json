@@ -2,15 +2,18 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm install --legacy-peer-deps",
+    "nixpacksPlan": {
+      "phases": {
+        "install": {
+          "cmds": ["npm install --legacy-peer-deps"]
+        }
+      }
+    },
     "watchPatterns": ["/server/**"]
   },
   "deploy": {
     "startCommand": "node server.js",
     "restartPolicyType": "ON_FAILURE",
     "healthcheckPath": "/"
-  },
-  "nixpacks": {
-    "installCommand": "npm install --legacy-peer-deps"
   }
 }
