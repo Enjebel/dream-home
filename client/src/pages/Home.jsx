@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom'; // NEW: To listen to URL changes
-import { Search, MapPin, Home as HomeIcon, Key, Hotel, Filter, SlidersHorizontal, LayoutGrid } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { 
+  Search, MapPin, Home as HomeIcon, Key, Hotel, 
+  LayoutGrid, SlidersHorizontal, ArrowUpDown, ChevronDown 
+} from 'lucide-react';
 import API from '../api';
 import PropertyCard from '../components/PropertyCard';
 
@@ -8,16 +11,14 @@ const Home = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState('newest'); // 'low', 'high', 'newest'
+  const [maxPrice, setMaxPrice] = useState(Infinity);
   
-  // NEW: Use SearchParams to read ?category= from the URL
   const [searchParams] = useSearchParams();
-  const categoryFromUrl = searchParams.get('category') || 'all'; // Default to 'all' if logo is clicked
-
-  // Synchronize state with URL
+  const categoryFromUrl = searchParams.get('category') || 'all';
   const [activeCategory, setActiveCategory] = useState(categoryFromUrl); 
 
   useEffect(() => {
-    // When the URL changes (e.g. Logo clicked or Navbar link clicked), update state
     setActiveCategory(categoryFromUrl);
   }, [categoryFromUrl]);
 
@@ -25,7 +26,6 @@ const Home = () => {
     const fetchProperties = async () => {
       setLoading(true);
       try {
-        // Fetch properties: if 'all', the backend returns everything
         const { data } = await API.get(`/properties?category=${activeCategory}`);
         setProperties(data);
       } catch (err) {
@@ -35,28 +35,44 @@ const Home = () => {
       }
     };
     fetchProperties();
-  }, [activeCategory]); 
+  }, [activeCategory]);
 
-  const filteredProperties = properties.filter(p => 
-    p.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.location?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Handle Filtering and Sorting Logic
+  const getProcessedProperties = () => {
+    let list = properties.filter(p => 
+      (p.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       p.title?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (p.price <= maxPrice)
+    );
+
+    if (sortOrder === 'low') list.sort((a, b) => a.price - b.price);
+    if (sortOrder === 'high') list.sort((a, b) => b.price - a.price);
+    
+    return list;
+  };
+
+  const filteredProperties = getProcessedProperties();
+
+  const getHeroImage = () => {
+    switch(activeCategory) {
+      case 'buy': return "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80";
+      case 'rent': return "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=80";
+      case 'book': return "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80";
+      default: return "https://images.unsplash.com/photo-1512915920307-446f1f9d7f0a?auto=format&fit=crop&w=1920&q=80";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* --- HERO SECTION --- */}
-      <div className="relative h-[650px] flex items-center justify-center bg-slate-900 overflow-hidden">
+      <div className="relative h-[600px] flex items-center justify-center bg-slate-900 overflow-hidden">
         <img 
-          src={
-            activeCategory === 'buy' ? "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80" :
-            activeCategory === 'rent' ? "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=80" :
-            activeCategory === 'book' ? "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80" :
-            "https://images.unsplash.com/photo-1512915920307-446f1f9d7f0a?auto=format&fit=crop&w=1920&q=80"
-          }
-          className="absolute inset-0 w-full h-full object-cover opacity-40 transition-opacity duration-1000"
-          alt="Luxury Real Estate"
+          key={activeCategory}
+          src={getHeroImage()}
+          className="absolute inset-0 w-full h-full object-cover opacity-50 transition-opacity duration-1000"
+          alt="Hero"
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-transparent to-slate-50"></div>
         
         <div className="relative z-10 text-center px-6 max-w-5xl">
           <h1 className="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter uppercase italic leading-[0.85]">
@@ -65,93 +81,85 @@ const Home = () => {
             {activeCategory === 'book' && <>Luxury <span className="text-blue-500">Escapes.</span></>}
             {activeCategory === 'all' && <>The Global <span className="text-blue-500">Collection.</span></>}
           </h1>
-          
-          <p className="text-xl text-gray-200 mb-10 font-medium max-w-2xl mx-auto">
-            The world's most exclusive marketplace for elite buyers, long-term renters, and global travelers.
-          </p>
 
-          {/* --- CATEGORY TOGGLE --- */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {[
-              { id: 'all', label: 'All', icon: <LayoutGrid size={18} /> },
-              { id: 'buy', label: 'Buy', icon: <HomeIcon size={18} /> },
-              { id: 'rent', label: 'Rent', icon: <Key size={18} /> },
-              { id: 'book', label: 'Stay', icon: <Hotel size={18} /> },
-            ].map((cat) => (
+            {['all', 'buy', 'rent', 'book'].map((id) => (
               <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-2xl ${
-                  activeCategory === cat.id 
-                  ? 'bg-blue-600 text-white shadow-blue-500/20 scale-105' 
-                  : 'bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20'
+                key={id}
+                onClick={() => setActiveCategory(id)}
+                className={`px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${
+                  activeCategory === id ? 'bg-blue-600 text-white' : 'bg-white/10 backdrop-blur-md text-white hover:bg-white/20'
                 }`}
               >
-                {cat.icon} {cat.label}
+                {id}
               </button>
             ))}
-          </div>
-
-          {/* SEARCH BOX */}
-          <div className="bg-white p-2 rounded-[2rem] shadow-2xl flex flex-col md:flex-row items-center gap-2 max-w-3xl mx-auto border border-gray-100">
-            <div className="flex items-center gap-3 px-6 py-4 w-full md:border-r border-gray-100">
-              <MapPin className="text-blue-600" size={24} />
-              <input 
-                type="text" 
-                placeholder="Search city, neighborhood, or style..."
-                className="w-full outline-none text-gray-900 font-bold placeholder:text-gray-300"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button className="w-full md:w-auto bg-slate-900 hover:bg-blue-600 text-white px-12 py-5 rounded-[1.5rem] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg">
-              Explore
-            </button>
           </div>
         </div>
       </div>
 
-      {/* --- MARKETPLACE FEED --- */}
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-               <span className="h-[2px] w-8 bg-blue-600"></span>
-               <span className="text-blue-600 font-black uppercase tracking-[0.3em] text-[10px]">Curated Collection</span>
-            </div>
-            <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">
-              {activeCategory === 'all' ? 'Featured' : activeCategory + 'ing'} <span className="text-gray-300">/</span> Marketplace
-            </h2>
-          </div>
+      {/* --- QUICK FILTER BAR --- */}
+      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20">
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/10 p-4 border border-gray-100 flex flex-wrap items-center justify-between gap-4">
           
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              <SlidersHorizontal size={14} /> {filteredProperties.length} Results
-            </div>
+          {/* Search Input */}
+          <div className="flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl flex-grow">
+            <Search size={18} className="text-blue-600" />
+            <input 
+              type="text" 
+              placeholder="Quick search..."
+              className="bg-transparent outline-none font-bold text-sm w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          {/* Price Range */}
+          <div className="flex items-center gap-2 bg-slate-50 px-4 py-3 rounded-2xl">
+            <span className="text-[10px] font-black uppercase text-gray-400 mr-2">Budget</span>
+            <select 
+              className="bg-transparent font-bold text-sm outline-none cursor-pointer"
+              onChange={(e) => setMaxPrice(e.target.value === 'all' ? Infinity : Number(e.target.value))}
+            >
+              <option value="all">Any Price</option>
+              <option value="500000">Under $500k</option>
+              <option value="1000000">Under $1M</option>
+              <option value="5000000">Under $5M</option>
+            </select>
+          </div>
+
+          {/* Sort Toggle */}
+          <div className="flex items-center gap-2 bg-slate-50 px-4 py-3 rounded-2xl">
+            <ArrowUpDown size={16} className="text-blue-600" />
+            <select 
+              className="bg-transparent font-bold text-sm outline-none cursor-pointer"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="newest">Newest First</option>
+              <option value="low">Price: Low to High</option>
+              <option value="high">Price: High to Low</option>
+            </select>
           </div>
         </div>
+      </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="h-[500px] bg-white border border-gray-100 animate-pulse rounded-[3rem]"></div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {filteredProperties.map((property) => (
-              <PropertyCard key={property._id} property={property} />
-            ))}
-          </div>
-        )}
+      {/* --- FEED --- */}
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="flex items-center justify-between mb-12">
+           <h2 className="text-3xl font-black text-gray-900 uppercase italic tracking-tighter">
+             {activeCategory} {activeCategory === 'all' ? 'Inventory' : 'Listings'}
+           </h2>
+           <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-4 py-2 rounded-full uppercase tracking-widest">
+             {filteredProperties.length} Properties Found
+           </span>
+        </div>
 
-        {/* --- EMPTY STATE --- */}
-        {filteredProperties.length === 0 && !loading && (
-          <div className="text-center py-32 bg-white rounded-[4rem] border border-gray-100 shadow-sm">
-            <h3 className="text-3xl font-black text-gray-900 uppercase italic">No Matches Found</h3>
-            <button onClick={() => setActiveCategory('all')} className="mt-8 text-blue-600 font-black uppercase tracking-widest text-xs">Reset Filters</button>
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {filteredProperties.map((property) => (
+            <PropertyCard key={property._id} property={property} />
+          ))}
+        </div>
       </div>
     </div>
   );
