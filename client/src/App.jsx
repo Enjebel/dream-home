@@ -11,7 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import CreateListing from './pages/CreateListing';
 import Favorites from './pages/Favorites';
-// This import must match the filename in your /pages folder exactly
+// Ensure this filename matches your file in /src/pages/ exactly
 import ProjectDoc from './pages/ProjectDoc'; 
 
 // Context Provider
@@ -31,7 +31,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               
-              {/* Documentation / Portfolio Page */}
+              {/* The Blueprint / Documentation Route */}
               <Route path="/documentation" element={<ProjectDoc />} />
 
               {/* Protected User Features */}
