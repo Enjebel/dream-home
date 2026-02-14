@@ -9,10 +9,10 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import PropertyDetails from './pages/PropertyDetails';
+// Ensure these files exist in your client/src/pages folder
 import CreateListing from './pages/CreateListing';
 import Favorites from './pages/Favorites';
-import ProjectDoc from './pages/ProjectDoc'; // The new documentation page
+import ProjectDoc from './pages/ProjectDoc'; 
 
 // Context Provider
 import { AuthProvider } from './context/AuthContext';
@@ -21,29 +21,28 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-gray-50">
           <Navbar />
           
-          <main className="flex-grow">
+          <main className="flex-grow container mx-auto px-4 py-8">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/property/:id" element={<PropertyDetails />} />
               
-              {/* Project Transparency / Documentation Route */}
+              {/* Transparency/Documentation Route */}
               <Route path="/documentation" element={<ProjectDoc />} />
 
-              {/* Protected Routes (Logic handled inside components) */}
+              {/* Protected Routes */}
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/favorites" element={<Favorites />} />
 
               {/* 404 Fallback */}
               <Route path="*" element={
-                <div className="flex flex-col items-center justify-center h-64">
-                  <h1 className="text-4xl font-bold">404</h1>
-                  <p>Page Not Found</p>
+                <div className="text-center py-20">
+                  <h1 className="text-6xl font-bold text-blue-600">404</h1>
+                  <p className="text-xl text-gray-600 mt-4">Oops! This luxury stay doesn't exist.</p>
                 </div>
               } />
             </Routes>

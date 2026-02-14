@@ -2,48 +2,36 @@ import React from 'react';
 
 const ProjectDoc = () => {
   return (
-    <div className="max-w-4xl mx-auto p-6 text-gray-800 leading-relaxed">
-      <h1 className="text-4xl font-bold mb-4 text-blue-600">The Blueprint: DreamHome</h1>
-      <p className="text-lg italic mb-8">A Technical Overview of a Modern MERN Stack Real Estate Platform</p>
-
-      <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-3 border-b-2 border-blue-100 pb-2">The Concept</h2>
-        <p>
-          DreamHome was developed to bridge the gap between cluttered real estate marketplaces and high-end users. 
-          The goal was to create a specialized platform for luxury stays that offers a clean, distraction-free 
-          experience for both property seekers and owners.
-        </p>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-3 border-b-2 border-blue-100 pb-2">Technical Architecture</h2>
-        <p className="mb-4">
-          The platform utilizes the <strong>MERN Stack</strong> to ensure high performance and a unified 
-          JavaScript development environment:
-        </p>
-        <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Frontend:</strong> React + Vite for a fast, responsive Single Page Application (SPA).</li>
-          <li><strong>Backend:</strong> Node.js & Express handling RESTful API logic and JWT authentication.</li>
-          <li><strong>Database:</strong> MongoDB Atlas for cloud-based, non-relational data persistence.</li>
-          <li><strong>DevOps:</strong> Dual-cloud deployment via Vercel (Frontend) and Railway (Backend).</li>
-        </ul>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-3 border-b-2 border-blue-100 pb-2">Key Challenges Solved</h2>
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="font-bold text-blue-800 mb-1">Production Handshake Fix</h3>
-          <p className="text-sm">
-            One of the primary challenges was ensuring stable cross-origin communication. We implemented custom 
-            Axios interceptors and dynamic BaseURL logic to resolve a critical 404 routing error during the 
-            transition from local development to production servers.
+    <div className="max-w-4xl mx-auto py-12 px-6 bg-white shadow-sm rounded-xl">
+      <h1 className="text-4xl font-extrabold text-blue-700 mb-6">Project Documentation</h1>
+      
+      <div className="space-y-8 text-gray-700">
+        <section>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3 underline decoration-blue-500">Overview</h2>
+          <p>
+            DreamHome is a premium real estate platform built to simplify the search for luxury accommodations. 
+            By leveraging the MERN stack, I've created a responsive, secure, and high-performance application.
           </p>
-        </div>
-      </section>
+        </section>
 
-      <footer className="mt-12 text-sm text-gray-500 border-t pt-4">
-        &copy; 2026 DreamHome Project | Developed by [Your Name]
-      </footer>
+        <section>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3 underline decoration-blue-500">The Stack</h2>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <li className="p-4 bg-gray-50 rounded-lg"><strong>Frontend:</strong> React, Vite, Tailwind CSS.</li>
+            <li className="p-4 bg-gray-50 rounded-lg"><strong>Backend:</strong> Node.js, Express.js.</li>
+            <li className="p-4 bg-gray-50 rounded-lg"><strong>Database:</strong> MongoDB Atlas (Cloud).</li>
+            <li className="p-4 bg-gray-50 rounded-lg"><strong>Auth:</strong> JSON Web Tokens (JWT).</li>
+          </ul>
+        </section>
+
+        <section className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+          <h2 className="text-xl font-bold text-blue-900 mb-2">Technical Achievement</h2>
+          <p className="text-blue-800">
+            Successfully resolved complex production routing issues by implementing dynamic BaseURL logic 
+            to bridge the connection between Vercel and Railway servers.
+          </p>
+        </section>
+      </div>
     </div>
   );
 };
