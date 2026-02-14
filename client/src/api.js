@@ -1,16 +1,23 @@
 import axios from 'axios';
 
 const API = axios.create({
-  // Ensure this exact variable name is in Vercel
+  // This uses the Vercel variable which includes /api
+  // Fallback to localhost if the variable isn't found
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  withCredentials: true
 });
 
+// Automatically adds the token to every request for protected routes
 API.interceptors.request.use((req) => {
   const userInfo = localStorage.getItem('userInfo');
   if (userInfo) {
-    const { token } = JSON.parse(userInfo);
-    req.headers.Authorization = `Bearer ${token}`;
+    try {
+      const { token } = JSON.parse(userInfo);
+      if (token) {
+        req.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error("Auth token parse error:", error);
+    }
   }
   return req;
 });
