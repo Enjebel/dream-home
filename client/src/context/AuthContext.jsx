@@ -6,18 +6,39 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [favorites, setFavorites] = useState([]);
 
+  // Load user data from localStorage on initial app load
   useEffect(() => {
     const savedUser = localStorage.getItem('userInfo');
     const savedFavs = localStorage.getItem('favorites');
-    if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedFavs) setFavorites(JSON.parse(savedFavs));
+    
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error("Failed to parse user info:", error);
+        localStorage.removeItem('userInfo');
+      }
+    }
+    
+    if (savedFavs) {
+      try {
+        setFavorites(JSON.parse(savedFavs));
+      } catch (error) {
+        console.error("Failed to parse favorites:", error);
+        localStorage.removeItem('favorites');
+      }
+    }
   }, []);
 
+  // Login handler: Saves user and token to localStorage
   const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('userInfo', JSON.stringify(userData));
+    if (userData) {
+      setUser(userData);
+      localStorage.setItem('userInfo', JSON.stringify(userData));
+    }
   };
 
+  // Logout handler: Clears all session data
   const logout = () => {
     setUser(null);
     setFavorites([]);
