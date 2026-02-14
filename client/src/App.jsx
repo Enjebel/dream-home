@@ -9,10 +9,9 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-// Ensure these files exist in your client/src/pages folder
 import CreateListing from './pages/CreateListing';
 import Favorites from './pages/Favorites';
-import ProjectDoc from './pages/ProjectDoc'; 
+import ProjectDoc from './pages/ProjectDoc'; // Verified import path
 
 // Context Provider
 import { AuthProvider } from './context/AuthContext';
@@ -24,14 +23,14 @@ function App() {
         <div className="flex flex-col min-h-screen bg-gray-50">
           <Navbar />
           
-          <main className="flex-grow container mx-auto px-4 py-8">
+          <main className="flex-grow container mx-auto px-4 py-6">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               
-              {/* Transparency/Documentation Route */}
+              {/* Documentation Route */}
               <Route path="/documentation" element={<ProjectDoc />} />
 
               {/* Protected Routes */}
@@ -42,7 +41,7 @@ function App() {
               <Route path="*" element={
                 <div className="text-center py-20">
                   <h1 className="text-6xl font-bold text-blue-600">404</h1>
-                  <p className="text-xl text-gray-600 mt-4">Oops! This luxury stay doesn't exist.</p>
+                  <p className="text-xl text-gray-600 mt-4">Luxury stay not found.</p>
                 </div>
               } />
             </Routes>
