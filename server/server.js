@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 
+// Load environment variables
 dotenv.config();
 
 // Connect to MongoDB
@@ -28,9 +29,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 
-// CRITICAL: Health Check Route for Railway
+// Root route - REQUIRED for Railway Health Check
 app.get('/', (req, res) => {
-  res.status(200).send('🏠 Real Estate API is live and healthy!');
+  res.status(200).send('🏠 Real Estate API is running...');
 });
 
 // --- ERROR HANDLING ---
@@ -42,9 +43,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// CRITICAL: Railway dynamic port binding
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  if (!process.env.MONGO_URI) {
+    console.error('❌ WARNING: MONGO_URI is not defined in environment variables!');
+  } else {
+    console.log('✅ MONGO_URI detected in environment.');
+  }
 });
