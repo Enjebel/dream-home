@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Home as HomeIcon, Key, Hotel, Filter, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom'; // NEW: To listen to URL changes
+import { Search, MapPin, Home as HomeIcon, Key, Hotel, Filter, SlidersHorizontal, LayoutGrid } from 'lucide-react';
 import API from '../api';
 import PropertyCard from '../components/PropertyCard';
 
@@ -8,14 +9,23 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // NEW: Category state to handle the specific needs of Buyers, Renters, and Bookers
-  const [activeCategory, setActiveCategory] = useState('buy'); 
+  // NEW: Use SearchParams to read ?category= from the URL
+  const [searchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get('category') || 'all'; // Default to 'all' if logo is clicked
+
+  // Synchronize state with URL
+  const [activeCategory, setActiveCategory] = useState(categoryFromUrl); 
+
+  useEffect(() => {
+    // When the URL changes (e.g. Logo clicked or Navbar link clicked), update state
+    setActiveCategory(categoryFromUrl);
+  }, [categoryFromUrl]);
 
   useEffect(() => {
     const fetchProperties = async () => {
       setLoading(true);
       try {
-        // Fetch properties filtered by category from the server
+        // Fetch properties: if 'all', the backend returns everything
         const { data } = await API.get(`/properties?category=${activeCategory}`);
         setProperties(data);
       } catch (err) {
@@ -25,9 +35,8 @@ const Home = () => {
       }
     };
     fetchProperties();
-  }, [activeCategory]); // Refetch whenever the user switches roles/categories
+  }, [activeCategory]); 
 
-  // Client-side search filtering within the active category
   const filteredProperties = properties.filter(p => 
     p.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -38,12 +47,12 @@ const Home = () => {
     <div className="min-h-screen bg-slate-50">
       {/* --- HERO SECTION --- */}
       <div className="relative h-[650px] flex items-center justify-center bg-slate-900 overflow-hidden">
-        {/* Dynamic Background Image based on Category */}
         <img 
           src={
             activeCategory === 'buy' ? "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80" :
             activeCategory === 'rent' ? "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=80" :
-            "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80"
+            activeCategory === 'book' ? "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80" :
+            "https://images.unsplash.com/photo-1512915920307-446f1f9d7f0a?auto=format&fit=crop&w=1920&q=80"
           }
           className="absolute inset-0 w-full h-full object-cover opacity-40 transition-opacity duration-1000"
           alt="Luxury Real Estate"
@@ -54,15 +63,17 @@ const Home = () => {
             {activeCategory === 'buy' && <>Find Your <span className="text-blue-500">Sanctuary.</span></>}
             {activeCategory === 'rent' && <>Premium <span className="text-blue-500">Living.</span></>}
             {activeCategory === 'book' && <>Luxury <span className="text-blue-500">Escapes.</span></>}
+            {activeCategory === 'all' && <>The Global <span className="text-blue-500">Collection.</span></>}
           </h1>
           
           <p className="text-xl text-gray-200 mb-10 font-medium max-w-2xl mx-auto">
             The world's most exclusive marketplace for elite buyers, long-term renters, and global travelers.
           </p>
 
-          {/* --- CATEGORY TOGGLE (The Choice Engine) --- */}
+          {/* --- CATEGORY TOGGLE --- */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {[
+              { id: 'all', label: 'All', icon: <LayoutGrid size={18} /> },
               { id: 'buy', label: 'Buy', icon: <HomeIcon size={18} /> },
               { id: 'rent', label: 'Rent', icon: <Key size={18} /> },
               { id: 'book', label: 'Stay', icon: <Hotel size={18} /> },
@@ -87,7 +98,7 @@ const Home = () => {
               <MapPin className="text-blue-600" size={24} />
               <input 
                 type="text" 
-                placeholder={activeCategory === 'book' ? "Search resorts or hotels..." : "Enter city, state or zip..."}
+                placeholder="Search city, neighborhood, or style..."
                 className="w-full outline-none text-gray-900 font-bold placeholder:text-gray-300"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -109,7 +120,7 @@ const Home = () => {
                <span className="text-blue-600 font-black uppercase tracking-[0.3em] text-[10px]">Curated Collection</span>
             </div>
             <h2 className="text-4xl font-black text-gray-900 uppercase italic tracking-tighter">
-              {activeCategory}ing <span className="text-gray-300">/</span> Marketplace
+              {activeCategory === 'all' ? 'Featured' : activeCategory + 'ing'} <span className="text-gray-300">/</span> Marketplace
             </h2>
           </div>
           
@@ -117,11 +128,6 @@ const Home = () => {
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
               <SlidersHorizontal size={14} /> {filteredProperties.length} Results
             </div>
-            <select className="px-5 py-3 bg-white border border-gray-100 rounded-xl font-bold text-xs uppercase tracking-widest hover:border-blue-500 transition outline-none cursor-pointer">
-              <option>Sort: Newest</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-            </select>
           </div>
         </div>
 
@@ -142,19 +148,8 @@ const Home = () => {
         {/* --- EMPTY STATE --- */}
         {filteredProperties.length === 0 && !loading && (
           <div className="text-center py-32 bg-white rounded-[4rem] border border-gray-100 shadow-sm">
-            <div className="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Search className="text-blue-600" size={40} />
-            </div>
             <h3 className="text-3xl font-black text-gray-900 uppercase italic">No Matches Found</h3>
-            <p className="text-gray-500 font-medium max-w-md mx-auto mt-2">
-              Our inventory for {activeCategory} is updating daily. Try adjusting your search or switching categories.
-            </p>
-            <button 
-              onClick={() => setSearchQuery('')}
-              className="mt-8 text-blue-600 font-black uppercase tracking-widest text-xs hover:underline"
-            >
-              Clear Search Query
-            </button>
+            <button onClick={() => setActiveCategory('all')} className="mt-8 text-blue-600 font-black uppercase tracking-widest text-xs">Reset Filters</button>
           </div>
         )}
       </div>

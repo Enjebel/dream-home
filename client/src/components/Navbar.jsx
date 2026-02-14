@@ -1,112 +1,119 @@
-import React, { useContext } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
-  Home, Heart, LayoutDashboard, PlusCircle, LogOut, 
-  Search, Key, Users, BookOpen, Mail 
+  Menu, X, Home as HomeIcon, Heart, 
+  PlusSquare, LayoutDashboard, LogOut, 
+  MessageSquare, Building2, ChevronDown 
 } from 'lucide-react';
-import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleCategoryClick = (category) => {
+    // Navigate to Home page with a query parameter
+    navigate(`/?category=${category}`);
+    setIsOpen(false);
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
         
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-2 group">
           <div className="bg-blue-600 p-2 rounded-xl group-hover:rotate-12 transition-transform">
-            <Home className="text-white" size={24} />
+            <HomeIcon className="text-white" size={24} />
           </div>
-          <span className="text-2xl font-black tracking-tighter text-gray-900 uppercase italic">
-            DREAM<span className="text-blue-600">HOME</span>
+          <span className="text-2xl font-black tracking-tighter uppercase italic">
+            Dream<span className="text-blue-600">Home</span>
           </span>
         </Link>
 
-        {/* NAVIGATION LINKS - Buyers, Renters & Documentations */}
-        <div className="hidden lg:flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
-            <Search size={16} /> Buy
-          </Link>
-          <Link to="/rent" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
-            <Key size={16} /> Rent
-          </Link>
-          <Link to="/agents" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
-            <Users size={16} /> Agents
-          </Link>
-          <Link to="/favorites" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
-            <Heart size={16} /> Favorites
-          </Link>
+        {/* DESKTOP NAVIGATION */}
+        <div className="hidden md:flex items-center gap-8">
+          <button onClick={() => handleCategoryClick('buy')} className="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 transition">Buy</button>
+          <button onClick={() => handleCategoryClick('rent')} className="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 transition">Rent</button>
+          <button onClick={() => handleCategoryClick('book')} className="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 transition">Stay</button>
           
           <div className="h-4 w-[1px] bg-gray-200 mx-2"></div>
 
-          <Link to="/documentation" className="flex items-center gap-1.5 text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition tracking-tighter">
-            <BookOpen size={14} /> The Blueprint
-          </Link>
-        </div>
-
-        {/* AUTH / ACTIONS */}
-        <div className="flex items-center gap-4">
           {user ? (
-            <div className="flex items-center gap-2 md:gap-4">
-              
-              {/* INBOX / MESSAGES */}
-              <Link 
-                to="/inbox" 
-                className="relative p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition"
-                title="Inquiries & Messages"
+            <div className="relative">
+              <button 
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center gap-3 bg-slate-900 text-white pl-5 pr-3 py-3 rounded-2xl hover:bg-blue-600 transition-all shadow-xl shadow-blue-100/20"
               >
-                <Mail size={22} />
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-blue-600 border-2 border-white rounded-full"></span>
-              </Link>
-
-              {/* LISTING ACTION (Sellers/Agents) */}
-              <Link 
-                to="/add-property" 
-                className="hidden sm:flex items-center gap-2 bg-black hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-gray-200"
-              >
-                <PlusCircle size={18} /> Sell
-              </Link>
-
-              <Link to="/dashboard" className="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition" title="Dashboard">
-                <LayoutDashboard size={22} />
-              </Link>
-
-              <div className="h-8 w-[1px] bg-gray-200 mx-1 hidden md:block"></div>
-
-              {/* USER PROFILE & LOGOUT */}
-              <div className="flex items-center gap-3 bg-gray-50 p-1.5 pr-4 rounded-2xl border border-gray-100">
-                <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-sm uppercase">
-                  {user.name?.charAt(0)}
+                <span className="text-xs font-black uppercase tracking-widest">{user.name.split(' ')[0]}</span>
+                <div className="bg-white/20 p-1 rounded-lg">
+                  <ChevronDown size={14} />
                 </div>
-                <button 
-                  onClick={handleLogout}
-                  className="text-gray-400 hover:text-red-500 transition"
-                  title="Logout"
-                >
-                  <LogOut size={18} />
-                </button>
-              </div>
+              </button>
+
+              {showDropdown && (
+                <div className="absolute top-full right-0 mt-4 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-3 flex flex-col gap-1 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <Link to="/dashboard" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
+                    <LayoutDashboard size={18} className="text-gray-400 group-hover:text-blue-600" />
+                    <span className="text-sm font-bold text-gray-700">Profile Dashboard</span>
+                  </Link>
+                  <Link to="/my-properties" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
+                    <Building2 size={18} className="text-gray-400 group-hover:text-blue-600" />
+                    <span className="text-sm font-bold text-gray-700">My Inventory</span>
+                  </Link>
+                  <Link to="/inbox" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
+                    <MessageSquare size={18} className="text-gray-400 group-hover:text-blue-600" />
+                    <span className="text-sm font-bold text-gray-700">Messages</span>
+                  </Link>
+                  <Link to="/favorites" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
+                    <Heart size={18} className="text-gray-400 group-hover:text-blue-600" />
+                    <span className="text-sm font-bold text-gray-700">Favorites</span>
+                  </Link>
+                  <hr className="my-2 border-gray-50" />
+                  <button 
+                    onClick={() => { logout(); setShowDropdown(false); }}
+                    className="flex items-center gap-3 p-4 hover:bg-red-50 text-red-500 rounded-2xl transition"
+                  >
+                    <LogOut size={18} />
+                    <span className="text-sm font-bold">Sign Out</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login" className="text-gray-600 hover:text-blue-600 font-bold px-4 text-sm uppercase tracking-widest">Sign In</Link>
-              <Link 
-                to="/register" 
-                className="bg-blue-600 hover:bg-black text-white px-6 py-3 rounded-xl font-black text-sm transition shadow-xl shadow-blue-100 uppercase tracking-tighter"
-              >
-                Join
-              </Link>
+            <div className="flex items-center gap-4">
+              <Link to="/login" className="text-xs font-black uppercase tracking-widest text-gray-900">Login</Link>
+              <Link to="/register" className="bg-blue-600 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-900 transition shadow-lg shadow-blue-100">Join</Link>
             </div>
           )}
         </div>
+
+        {/* MOBILE MENU TOGGLE */}
+        <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </div>
+
+      {/* MOBILE MENU */}
+      {isOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 p-6 flex flex-col gap-6 animate-in slide-in-from-right">
+          <button onClick={() => handleCategoryClick('buy')} className="text-lg font-black uppercase italic text-left">Buy</button>
+          <button onClick={() => handleCategoryClick('rent')} className="text-lg font-black uppercase italic text-left">Rent</button>
+          <button onClick={() => handleCategoryClick('book')} className="text-lg font-black uppercase italic text-left">Stay</button>
+          <hr />
+          {user ? (
+            <>
+              <Link to="/my-properties" className="font-bold text-gray-600">My Inventory</Link>
+              <Link to="/inbox" className="font-bold text-gray-600">Messages</Link>
+              <button onClick={logout} className="text-red-500 font-bold text-left">Sign Out</button>
+            </>
+          ) : (
+            <Link to="/login" className="bg-blue-600 text-white text-center py-4 rounded-2xl font-black uppercase tracking-widest">Login / Register</Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 };
