@@ -9,12 +9,12 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import CreateListing from './pages/CreateListing';
-import Favorites from './pages/Favorites';
-// Ensure this filename matches your file in /src/pages/ exactly
 import ProjectDoc from './pages/ProjectDoc'; 
+import Favorites from './pages/Favorites';
 
-// Context Provider
+// FIXED IMPORT: Changed from CreateListing to AddProperty to match your filename
+import AddProperty from './pages/AddProperty';
+
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -26,23 +26,24 @@ function App() {
           
           <main className="flex-grow">
             <Routes>
-              {/* Public Discovery Routes */}
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               
-              {/* The Blueprint / Documentation Route */}
+              {/* Documentation Route */}
               <Route path="/documentation" element={<ProjectDoc />} />
 
-              {/* Protected User Features */}
-              <Route path="/create-listing" element={<CreateListing />} />
+              {/* Protected User Routes */}
+              {/* Updated element to use AddProperty */}
+              <Route path="/create-listing" element={<AddProperty />} />
               <Route path="/favorites" element={<Favorites />} />
 
-              {/* 404 Custom Fallback */}
+              {/* 404 Fallback */}
               <Route path="*" element={
                 <div className="flex flex-col items-center justify-center py-20">
                   <h1 className="text-5xl font-bold text-gray-200">404</h1>
-                  <p className="text-gray-500 mt-2">We couldn't find that luxury stay.</p>
+                  <p className="text-gray-500 mt-2">Luxury stay not found.</p>
                 </div>
               } />
             </Routes>
