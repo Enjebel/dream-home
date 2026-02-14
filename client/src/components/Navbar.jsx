@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, Heart, LayoutDashboard, PlusCircle, LogOut, User } from 'lucide-react';
+import { Home, Heart, LayoutDashboard, PlusCircle, LogOut, Search, Key, Users, BookOpen } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -21,16 +21,29 @@ const Navbar = () => {
           <div className="bg-blue-600 p-2 rounded-xl group-hover:rotate-12 transition-transform">
             <Home className="text-white" size={24} />
           </div>
-          <span className="text-2xl font-black tracking-tighter text-gray-900">
+          <span className="text-2xl font-black tracking-tighter text-gray-900 uppercase">
             DREAM<span className="text-blue-600">HOME</span>
           </span>
         </Link>
 
-        {/* NAVIGATION LINKS */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-gray-600 hover:text-blue-600 font-bold transition">Search</Link>
-          <Link to="/favorites" className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-bold transition">
+        {/* NAVIGATION LINKS - Expanded for Buyers & Renters */}
+        <div className="hidden lg:flex items-center gap-6">
+          <Link to="/" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
+            <Search size={18} /> Buy
+          </Link>
+          <Link to="/rent" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
+            <Key size={18} /> Rent
+          </Link>
+          <Link to="/agents" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
+            <Users size={18} /> Agents
+          </Link>
+          <Link to="/favorites" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
             <Heart size={18} /> Favorites
+          </Link>
+          
+          {/* Technical Documentation Link */}
+          <Link to="/documentation" className="flex items-center gap-1.5 text-blue-500 bg-blue-50 px-3 py-1 rounded-lg text-xs font-black uppercase hover:bg-blue-100 transition">
+            <BookOpen size={14} /> The Blueprint
           </Link>
         </div>
 
@@ -38,15 +51,15 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-3">
-              {/* Add Property Button (The "Listing Client" Action) */}
+              {/* List a Home Action (Owners/Agents) */}
               <Link 
                 to="/add-property" 
                 className="hidden sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-100"
               >
-                <PlusCircle size={18} /> List a Home
+                <PlusCircle size={18} /> Sell
               </Link>
 
-              <Link to="/dashboard" className="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition">
+              <Link to="/dashboard" className="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition" title="Dashboard">
                 <LayoutDashboard size={22} />
               </Link>
 
