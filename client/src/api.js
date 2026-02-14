@@ -1,22 +1,30 @@
 import axios from 'axios';
 
+// This logic ensures the /api suffix is ALWAYS present
+const getBaseURL = () => {
+  const envURL = import.meta.env.VITE_API_URL;
+  if (envURL) return envURL;
+  
+  // Fallback for local development
+  return 'http://localhost:5000/api';
+};
+
 const API = axios.create({
-  // This uses the Vercel variable which includes /api
-  // Fallback to localhost if the variable isn't found
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseURL(),
+  withCredentials: true
 });
 
-// Automatically adds the token to every request for protected routes
+// Add the token to every request automatically
 API.interceptors.request.use((req) => {
   const userInfo = localStorage.getItem('userInfo');
   if (userInfo) {
     try {
-      const { token } = JSON.parse(userInfo);
-      if (token) {
-        req.headers.Authorization = `Bearer ${token}`;
+      const parsed = JSON.parse(userInfo);
+      if (parsed && parsed.token) {
+        req.headers.Authorization = `Bearer ${parsed.token}`;
       }
-    } catch (error) {
-      console.error("Auth token parse error:", error);
+    } catch (e) {
+      console.error("Token parse error");
     }
   }
   return req;
