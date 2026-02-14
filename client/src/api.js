@@ -1,12 +1,15 @@
 import axios from 'axios';
 
-// This logic ensures the /api suffix is ALWAYS present
+// We manually check if the URL ends with /api to prevent the 404 you are seeing
 const getBaseURL = () => {
-  const envURL = import.meta.env.VITE_API_URL;
-  if (envURL) return envURL;
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   
-  // Fallback for local development
-  return 'http://localhost:5000/api';
+  // Hard fix: if the URL exists but doesn't end with /api, add it
+  if (url && !url.endsWith('/api')) {
+    url = url.endsWith('/') ? `${url}api` : `${url}/api`;
+  }
+  
+  return url;
 };
 
 const API = axios.create({
@@ -14,14 +17,13 @@ const API = axios.create({
   withCredentials: true
 });
 
-// Add the token to every request automatically
 API.interceptors.request.use((req) => {
   const userInfo = localStorage.getItem('userInfo');
   if (userInfo) {
     try {
-      const parsed = JSON.parse(userInfo);
-      if (parsed && parsed.token) {
-        req.headers.Authorization = `Bearer ${parsed.token}`;
+      const { token } = JSON.parse(userInfo);
+      if (token) {
+        req.headers.Authorization = `Bearer ${token}`;
       }
     } catch (e) {
       console.error("Token parse error");
