@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, ArrowLeft, Bed, Bath, Maximize, Mail, Star, Send, Play, ChevronLeft, ChevronRight, Calendar, CreditCard } from 'lucide-react';
+import { MapPin, ArrowLeft, Bed, Bath, Maximize, Mail, Star, Send, Play, ChevronLeft, ChevronRight, Calendar, CreditCard, XCircle } from 'lucide-react';
 import API from '../api';
+import { useAuth } from '../context/AuthContext'; // Added for review logic
 import ReviewSection from '../components/ReviewSection';
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth(); // To identify the reviewer
+  
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -31,10 +34,41 @@ const PropertyDetails = () => {
     fetchDetails();
   }, [id]);
 
+  // MISSING FUNCTION FIXED: handleReviewSubmit
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      alert("Please login to leave a review");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Assuming your backend has a /properties/:id/reviews endpoint
+      const { data } = await API.post(`/properties/${id}/reviews`, {
+        rating,
+        comment,
+        userName: user.name
+      });
+      
+      // Update local state to show new review immediately
+      setProperty(prev => ({
+        ...prev,
+        reviews: [data.review, ...(prev.reviews || [])]
+      }));
+      setComment('');
+      alert("Review posted successfully!");
+    } catch (err) {
+      console.error("Review error:", err);
+      alert("Failed to post review. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Context-aware Action Handler
   const handlePrimaryAction = () => {
     if (property.category === 'book') {
-      // Future implementation: Open booking modal or calendar
       alert(`Initiating booking for ${property.title}. Redirecting to secure checkout...`);
     } else {
       const email = property?.owner?.email || "agent@dreamhome.com";
@@ -42,8 +76,20 @@ const PropertyDetails = () => {
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center font-black text-blue-600 italic animate-pulse">LOADING...</div>;
-  if (!property) return <div className="text-center py-20 font-black">PROPERTY NOT FOUND</div>;
+  if (loading) return (
+    <div className="h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
+      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <p className="font-black text-blue-600 italic animate-pulse tracking-widest">LOADING LUXURY...</p>
+    </div>
+  );
+
+  if (!property) return (
+    <div className="h-screen flex flex-col items-center justify-center text-center">
+      <XCircle size={60} className="text-red-500 mb-4" />
+      <h2 className="text-4xl font-black uppercase italic">Property Not Found</h2>
+      <button onClick={() => navigate('/')} className="mt-6 bg-slate-900 text-white px-8 py-3 rounded-xl font-bold">Return Home</button>
+    </div>
+  );
 
   const gallery = property.media?.length > 0 
     ? property.media 
@@ -114,7 +160,6 @@ const PropertyDetails = () => {
           </div>
 
           <div className="flex items-center gap-3 mb-4">
-             {/* Dynamic Category Tag */}
              <span className="bg-blue-600 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest">
                 {property.category === 'buy' ? 'For Sale' : property.category === 'rent' ? 'For Rent' : 'Hotel/Stay'}
              </span>
@@ -178,7 +223,7 @@ const PropertyDetails = () => {
           <ReviewSection reviews={property.reviews || []} />
         </div>
 
-        {/* STICKY BOOKING/CONTACT CARD */}
+        {/* STICKY CARD */}
         <div className="lg:col-span-1">
           <div className="sticky top-24 bg-white rounded-[3rem] p-10 shadow-2xl border border-gray-50">
             <p className="text-gray-400 font-bold uppercase text-xs mb-2 tracking-widest">
@@ -206,9 +251,6 @@ const PropertyDetails = () => {
                     <CreditCard size={18} className="text-blue-600" />
                     Secure Payment Guarantee
                 </div>
-                <p className="text-center text-gray-400 text-xs font-bold uppercase tracking-tighter">
-                    Managed by {property.owner?.name || "DreamHome Premier Agent"}
-                </p>
             </div>
           </div>
         </div>
