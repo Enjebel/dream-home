@@ -9,12 +9,13 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import ProjectDoc from './pages/ProjectDoc'; 
 import Favorites from './pages/Favorites';
+import ProjectDoc from './pages/ProjectDoc'; 
 
-// FIXED IMPORT: Changed from CreateListing to AddProperty to match your filename
+// FIXED: Using your actual filename AddProperty.jsx instead of CreateListing.jsx
 import AddProperty from './pages/AddProperty';
 
+// Context Provider
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -34,14 +35,14 @@ function App() {
               {/* Documentation Route */}
               <Route path="/documentation" element={<ProjectDoc />} />
 
-              {/* Protected User Routes */}
-              {/* Updated element to use AddProperty */}
+              {/* Protected User Features */}
+              {/* Changed element to use AddProperty to resolve the build crash */}
               <Route path="/create-listing" element={<AddProperty />} />
               <Route path="/favorites" element={<Favorites />} />
 
               {/* 404 Fallback */}
               <Route path="*" element={
-                <div className="flex flex-col items-center justify-center py-20">
+                <div className="flex flex-col items-center justify-center py-20 text-center">
                   <h1 className="text-5xl font-bold text-gray-200">404</h1>
                   <p className="text-gray-500 mt-2">Luxury stay not found.</p>
                 </div>
