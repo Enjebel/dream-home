@@ -9,6 +9,7 @@ dotenv.config();
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
+const inquiryRoutes = require('./routes/inquiryRoutes'); // NEW: Import Inquiry logic
 
 // 3. Connect to Database
 connectDB();
@@ -31,6 +32,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // --- ROUTES ---
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
+app.use('/api/inquiries', inquiryRoutes); // NEW: Mount Inquiry routes
 
 // Health Check for Railway
 app.get('/', (req, res) => {
@@ -52,4 +54,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`✅ MONGO_URI detected: ${process.env.MONGO_URI ? 'YES' : 'NO'}`);
   console.log(`🔗 Permitted Client URL: ${process.env.CLIENT_URL || 'Not set'}`);
+  console.log(`💬 Inquiry System: ACTIVE`); // Confirmation log
 });

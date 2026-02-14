@@ -1,10 +1,18 @@
 const Property = require('../models/Property');
 
-// @desc    Get all properties
+// @desc    Get all properties (with dynamic category filtering)
 // @route   GET /api/properties
 exports.getProperties = async (req, res) => {
   try {
-    const properties = await Property.find({}).sort({ createdAt: -1 });
+    const { category } = req.query; // NEW: Get category from URL query string
+    
+    let query = {};
+    // If a specific category is requested and it's not 'all', filter the DB results
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+
+    const properties = await Property.find(query).sort({ createdAt: -1 });
     res.status(200).json(properties);
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
@@ -38,20 +46,24 @@ exports.getPropertyById = async (req, res) => {
 // @route   POST /api/properties
 exports.createProperty = async (req, res) => {
   try {
-    const { title, description, price, location, bedrooms, bathrooms, size, images } = req.body;
+    const { 
+      title, description, price, location, bedrooms, 
+      bathrooms, size, images, category 
+    } = req.body;
 
-    // Force Number conversion so the database saves actual digits
+    // Force Number conversion and include the new Category field
     const property = new Property({
       owner: req.user._id,
       title,
       description,
       price: Number(price),
       location,
+      category: category || 'buy', // Default to 'buy' if not specified
       bedrooms: Number(bedrooms) || 0,
       bathrooms: Number(bathrooms) || 0,
       size: Number(size) || 0,
       images: images || [],
-      reviews: [] // Initialize as empty to prevent the 'map' error on frontend
+      reviews: [] 
     });
 
     const savedProperty = await property.save();
@@ -70,7 +82,6 @@ exports.addPropertyReview = async (req, res) => {
     const property = await Property.findById(req.params.id);
 
     if (property) {
-      // Check if user already reviewed this property
       const alreadyReviewed = property.reviews.find(
         (r) => r.user.toString() === req.user._id.toString()
       );
@@ -88,7 +99,6 @@ exports.addPropertyReview = async (req, res) => {
 
       property.reviews.push(review);
 
-      // Optional: Calculate overall rating of the property
       if (property.reviews.length > 0) {
         property.rating = 
           property.reviews.reduce((acc, item) => item.rating + acc, 0) / 
@@ -113,7 +123,6 @@ exports.deleteProperty = async (req, res) => {
     const property = await Property.findById(req.params.id);
 
     if (property) {
-      // Check if user is the owner
       if (property.owner.toString() !== req.user._id.toString()) {
         return res.status(401).json({ message: "User not authorized" });
       }

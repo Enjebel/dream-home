@@ -1,182 +1,195 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, MapPin, DollarSign, Bed, Bath, Maximize, Film, Image as ImageIcon } from 'lucide-react';
+import { Building2, MapPin, DollarSign, Camera, Info, Tag, Key, Hotel, Home as HomeIcon } from 'lucide-react';
 import API from '../api';
 
 const AddProperty = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  
-  // Changed state to handle objects containing URL and TYPE (image/video)
-  const [mediaFiles, setMediaFiles] = useState([]); 
-  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
     location: '',
-    bedrooms: '',
-    bathrooms: '',
-    size: ''
+    city: '',
+    image: '',
+    category: 'buy', // Matches the backend category filter
   });
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    
-    files.forEach(file => {
-      const isVideo = file.type.startsWith('video/');
-      const reader = new FileReader();
-      
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        setMediaFiles(prev => [...prev, {
-          url: reader.result,
-          type: isVideo ? 'video' : 'image'
-        }]);
-      };
-    });
-  };
-
-  const removeMedia = (index) => {
-    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (mediaFiles.length === 0) {
-      return alert("Please upload at least one image or video.");
-    }
-
     setLoading(true);
     try {
-      // payload now includes the 'media' array for your updated Mongoose model
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        price: Number(formData.price),
-        location: formData.location,
-        bedrooms: Number(formData.bedrooms) || 0,
-        bathrooms: Number(formData.bathrooms) || 0,
-        size: Number(formData.size) || 0,
-        media: mediaFiles, // Array of {url, type}
-        images: mediaFiles.filter(m => m.type === 'image').map(m => m.url) // Fallback for legacy code
+      // Data preparation: Wrap the image in an array to match the Property Model
+      const submissionData = {
+        ...formData,
+        images: [formData.image], 
+        price: Number(formData.price)
       };
 
-      await API.post('/properties', payload);
-      alert('Property listed successfully with multi-media!');
-      navigate('/dashboard');
+      // Sends the data to your updated controller
+      await API.post('/properties', submissionData);
+      navigate('/');
     } catch (err) {
-      console.error("Upload Error:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to add property.");
+      console.error("Error adding property:", err);
+      alert("Failed to add property. Please ensure all fields are filled correctly.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <div className="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100">
-        <div className="bg-blue-600 p-10 text-white">
-          <h2 className="text-3xl font-black uppercase tracking-tighter italic">List Your Home</h2>
-          <p className="opacity-80 mt-2 font-medium">Add high-quality photos and videos to showcase your property.</p>
+    <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-6">
+      <div className="max-w-3xl mx-auto bg-white rounded-[3rem] shadow-xl shadow-gray-200/50 overflow-hidden border border-gray-100">
+        <div className="bg-slate-900 p-10 text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h1 className="text-4xl font-black tracking-tighter uppercase italic">List Your Asset</h1>
+            <p className="text-gray-400 font-medium mt-1">Target buyers, renters, or travelers worldwide.</p>
+          </div>
+          {/* Decorative design element */}
+          <div className="absolute top-0 right-0 w-32 h-full bg-blue-600 skew-x-12 translate-x-10 opacity-20"></div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-10 space-y-8">
+          {/* --- CATEGORY SELECTION --- */}
           <div className="space-y-4">
-            <input 
-              className="w-full p-5 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-bold text-lg" 
-              placeholder="Property Title"
-              onChange={(e) => setFormData({...formData, title: e.target.value})}
-              required 
-            />
-            <textarea 
-              rows="4"
-              className="w-full p-5 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-medium" 
-              placeholder="Property Description"
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
-              required 
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="relative">
-              <DollarSign className="absolute left-4 top-5 text-gray-400" size={20} />
-              <input 
-                type="number"
-                className="w-full p-5 pl-12 bg-gray-50 rounded-2xl outline-none font-bold" 
-                placeholder="Price (USD)"
-                onChange={(e) => setFormData({...formData, price: e.target.value})}
-                required 
-              />
-            </div>
-            <div className="relative">
-              <MapPin className="absolute left-4 top-5 text-gray-400" size={20} />
-              <input 
-                className="w-full p-5 pl-12 bg-gray-50 rounded-2xl outline-none font-bold" 
-                placeholder="Location"
-                onChange={(e) => setFormData({...formData, location: e.target.value})}
-                required 
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-6">
-            <div className="relative">
-              <Bed className="absolute left-4 top-5 text-blue-500" size={20} />
-              <input type="number" placeholder="Beds" className="w-full p-5 pl-12 bg-gray-50 rounded-2xl outline-none font-bold" onChange={(e) => setFormData({...formData, bedrooms: e.target.value})} />
-            </div>
-            <div className="relative">
-              <Bath className="absolute left-4 top-5 text-blue-500" size={20} />
-              <input type="number" placeholder="Baths" className="w-full p-5 pl-12 bg-gray-50 rounded-2xl outline-none font-bold" onChange={(e) => setFormData({...formData, bathrooms: e.target.value})} />
-            </div>
-            <div className="relative">
-              <Maximize className="absolute left-4 top-5 text-blue-500" size={20} />
-              <input type="number" placeholder="Sqft" className="w-full p-5 pl-12 bg-gray-50 rounded-2xl outline-none font-bold" onChange={(e) => setFormData({...formData, size: e.target.value})} />
-            </div>
-          </div>
-
-          {/* UPDATED MULTI-MEDIA UPLOAD SECTION */}
-          <div className="space-y-4">
-            <label className="flex flex-col items-center justify-center w-full h-44 border-4 border-dashed border-gray-100 rounded-[2.5rem] cursor-pointer hover:bg-gray-50 transition-all group">
-              <Upload className="text-gray-300 mb-2 group-hover:text-blue-500 transition-colors" size={40} />
-              <span className="text-gray-400 font-black uppercase text-xs tracking-widest">Upload Images & Videos</span>
-              <input type="file" className="hidden" multiple onChange={handleFileChange} accept="image/*,video/*" />
+            <label className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
+              <Tag size={14} className="text-blue-600" /> Select Listing Type
             </label>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {mediaFiles.map((file, i) => (
-                <div key={i} className="relative h-32 rounded-2xl overflow-hidden group shadow-md border-2 border-white">
-                  {file.type === 'video' ? (
-                    <video src={file.url} className="w-full h-full object-cover" />
-                  ) : (
-                    <img src={file.url} className="w-full h-full object-cover" alt="preview" />
-                  )}
-                  
-                  {/* Remove Button */}
-                  <button 
-                    type="button"
-                    onClick={() => removeMedia(i)}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:scale-110 transition"
-                  >
-                    <X size={14} />
-                  </button>
-
-                  {/* Type Indicator Icon */}
-                  <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm p-1.5 rounded-lg text-white">
-                    {file.type === 'video' ? <Film size={14} /> : <ImageIcon size={14} />}
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { id: 'buy', label: 'For Sale', icon: <HomeIcon size={18} />, desc: 'Real Estate' },
+                { id: 'rent', label: 'Rental', icon: <Key size={18} />, desc: 'Long-term' },
+                { id: 'book', label: 'Stay', icon: <Hotel size={18} />, desc: 'Hospitality' }
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, category: cat.id })}
+                  className={`flex flex-col items-start gap-1 p-5 rounded-[2rem] border-2 transition-all ${
+                    formData.category === cat.id
+                      ? 'border-blue-600 bg-blue-50/50 text-blue-600 shadow-lg shadow-blue-100'
+                      : 'border-gray-50 bg-gray-50/30 text-gray-400 hover:border-gray-200'
+                  }`}
+                >
+                  <span className={formData.category === cat.id ? 'text-blue-600' : 'text-gray-300'}>
+                    {cat.icon}
+                  </span>
+                  <span className="font-black uppercase tracking-tighter text-sm mt-2">{cat.label}</span>
+                  <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest">{cat.desc}</span>
+                </button>
               ))}
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Title */}
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">Property Title</label>
+              <div className="relative">
+                <Building2 className="absolute left-5 top-4 text-gray-300" size={18} />
+                <input
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="Modern Penthouse..."
+                  className="w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-bold"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">
+                Price ({formData.category === 'buy' ? 'Total' : 'per Night'})
+              </label>
+              <div className="relative">
+                <DollarSign className="absolute left-5 top-4 text-gray-300" size={18} />
+                <input
+                  type="number"
+                  name="price"
+                  required
+                  placeholder="0.00"
+                  className="w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-bold"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Location & City */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">Full Address</label>
+              <div className="relative">
+                <MapPin className="absolute left-5 top-4 text-gray-300" size={18} />
+                <input
+                  type="text"
+                  name="location"
+                  required
+                  placeholder="123 Luxury Way..."
+                  className="w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-bold"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">City</label>
+              <input
+                type="text"
+                name="city"
+                required
+                placeholder="Beverly Hills"
+                className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-bold"
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          {/* Image URL */}
+          <div className="space-y-2">
+            <label className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">High-Res Image URL</label>
+            <div className="relative">
+              <Camera className="absolute left-5 top-4 text-gray-300" size={18} />
+              <input
+                type="text"
+                name="image"
+                required
+                placeholder="https://images.unsplash.com/..."
+                className="w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-bold"
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <label className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">Executive Summary</label>
+            <div className="relative">
+              <Info className="absolute left-5 top-5 text-gray-300" size={18} />
+              <textarea
+                name="description"
+                required
+                rows="4"
+                placeholder="Describe the unique value proposition of this property..."
+                className="w-full pl-14 pr-6 py-5 bg-gray-50/50 border border-gray-100 rounded-[2rem] focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium italic"
+                onChange={handleChange}
+              ></textarea>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-6 rounded-2xl font-black text-xl hover:bg-black transition-all shadow-xl shadow-blue-100 disabled:bg-gray-400"
+            className="w-full bg-blue-600 hover:bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-blue-200 transition-all active:scale-[0.98] disabled:opacity-50"
           >
-            {loading ? "Publishing to Marketplace..." : "List Home Now"}
+            {loading ? "Verifying & Publishing..." : "Deploy Listing"}
           </button>
         </form>
       </div>

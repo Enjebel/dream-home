@@ -10,24 +10,28 @@ const {
 } = require('../controllers/propertyController');
 const { protect } = require('../middleware/authMiddleware');
 
-// @route   GET & POST /api/properties
-// Public can view all, but only logged-in users (protect) can create
+// @route   GET /api/properties
+// @desc    Public can view all properties (Supports ?category= query param)
+// @route   POST /api/properties
+// @desc    Only logged-in users can create listings
 router.route('/')
   .get(getProperties)
   .post(protect, createProperty);
 
 // @route   GET /api/properties/myproperties
-// Only logged-in users can see their own listings
+// @desc    Dashboard view: Only logged-in users see their own listings
 router.get('/myproperties', protect, getMyProperties);
 
-// @route   GET & DELETE /api/properties/:id
-// Public can view details, but only owners (protected in controller) can delete
+// @route   GET /api/properties/:id
+// @desc    Public can view property details
+// @route   DELETE /api/properties/:id
+// @desc    Only the owner (verified in controller) can delete
 router.route('/:id')
   .get(getPropertyById)
   .delete(protect, deleteProperty);
 
 // @route   POST /api/properties/:id/reviews
-// This opens the "door" that was giving you the 404 error
+// @desc    Authenticated users can leave feedback
 router.route('/:id/reviews').post(protect, addPropertyReview);
 
 module.exports = router;

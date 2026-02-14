@@ -1,6 +1,9 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, Heart, LayoutDashboard, PlusCircle, LogOut, Search, Key, Users, BookOpen } from 'lucide-react';
+import { 
+  Home, Heart, LayoutDashboard, PlusCircle, LogOut, 
+  Search, Key, Users, BookOpen, Mail 
+} from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -21,28 +24,29 @@ const Navbar = () => {
           <div className="bg-blue-600 p-2 rounded-xl group-hover:rotate-12 transition-transform">
             <Home className="text-white" size={24} />
           </div>
-          <span className="text-2xl font-black tracking-tighter text-gray-900 uppercase">
+          <span className="text-2xl font-black tracking-tighter text-gray-900 uppercase italic">
             DREAM<span className="text-blue-600">HOME</span>
           </span>
         </Link>
 
-        {/* NAVIGATION LINKS - Expanded for Buyers & Renters */}
+        {/* NAVIGATION LINKS - Buyers, Renters & Documentations */}
         <div className="hidden lg:flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
-            <Search size={18} /> Buy
+          <Link to="/" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
+            <Search size={16} /> Buy
           </Link>
-          <Link to="/rent" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
-            <Key size={18} /> Rent
+          <Link to="/rent" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
+            <Key size={16} /> Rent
           </Link>
-          <Link to="/agents" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
-            <Users size={18} /> Agents
+          <Link to="/agents" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
+            <Users size={16} /> Agents
           </Link>
-          <Link to="/favorites" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition">
-            <Heart size={18} /> Favorites
+          <Link to="/favorites" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 font-bold transition uppercase text-xs tracking-widest">
+            <Heart size={16} /> Favorites
           </Link>
           
-          {/* Technical Documentation Link */}
-          <Link to="/documentation" className="flex items-center gap-1.5 text-blue-500 bg-blue-50 px-3 py-1 rounded-lg text-xs font-black uppercase hover:bg-blue-100 transition">
+          <div className="h-4 w-[1px] bg-gray-200 mx-2"></div>
+
+          <Link to="/documentation" className="flex items-center gap-1.5 text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition tracking-tighter">
             <BookOpen size={14} /> The Blueprint
           </Link>
         </div>
@@ -50,11 +54,22 @@ const Navbar = () => {
         {/* AUTH / ACTIONS */}
         <div className="flex items-center gap-4">
           {user ? (
-            <div className="flex items-center gap-3">
-              {/* List a Home Action (Owners/Agents) */}
+            <div className="flex items-center gap-2 md:gap-4">
+              
+              {/* INBOX / MESSAGES */}
+              <Link 
+                to="/inbox" 
+                className="relative p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition"
+                title="Inquiries & Messages"
+              >
+                <Mail size={22} />
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-blue-600 border-2 border-white rounded-full"></span>
+              </Link>
+
+              {/* LISTING ACTION (Sellers/Agents) */}
               <Link 
                 to="/add-property" 
-                className="hidden sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-100"
+                className="hidden sm:flex items-center gap-2 bg-black hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-gray-200"
               >
                 <PlusCircle size={18} /> Sell
               </Link>
@@ -63,10 +78,11 @@ const Navbar = () => {
                 <LayoutDashboard size={22} />
               </Link>
 
-              <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
+              <div className="h-8 w-[1px] bg-gray-200 mx-1 hidden md:block"></div>
 
+              {/* USER PROFILE & LOGOUT */}
               <div className="flex items-center gap-3 bg-gray-50 p-1.5 pr-4 rounded-2xl border border-gray-100">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-black text-sm uppercase">
+                <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-sm uppercase">
                   {user.name?.charAt(0)}
                 </div>
                 <button 
@@ -80,10 +96,10 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link to="/login" className="text-gray-600 hover:text-blue-600 font-bold px-4">Sign In</Link>
+              <Link to="/login" className="text-gray-600 hover:text-blue-600 font-bold px-4 text-sm uppercase tracking-widest">Sign In</Link>
               <Link 
                 to="/register" 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-100"
+                className="bg-blue-600 hover:bg-black text-white px-6 py-3 rounded-xl font-black text-sm transition shadow-xl shadow-blue-100 uppercase tracking-tighter"
               >
                 Join
               </Link>
