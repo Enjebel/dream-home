@@ -14,11 +14,14 @@ connectDB();
 const app = express();
 
 // --- MIDDLEWARE ---
+
+// CORS Configuration
 app.use(cors({ 
   origin: [
-    'http://localhost:5173', 
-    'https://dreamhome-lux.vercel.app' 
-  ], 
+    process.env.CLIENT_URL,            // This pulls the value you are adding now
+    'https://dreamhome-lux.vercel.app', // Hardcoded fallback
+    'http://localhost:5173'             // For local development
+  ].filter(Boolean), 
   credentials: true 
 }));
 
@@ -29,7 +32,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 
-// Root route - REQUIRED for Railway Health Check
+// Root route - Required for Railway Health Check
 app.get('/', (req, res) => {
   res.status(200).send('🏠 Real Estate API is running...');
 });
@@ -47,9 +50,6 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  if (!process.env.MONGO_URI) {
-    console.error('❌ WARNING: MONGO_URI is not defined in environment variables!');
-  } else {
-    console.log('✅ MONGO_URI detected in environment.');
-  }
+  console.log(`✅ MONGO_URI detected: ${process.env.MONGO_URI ? 'YES' : 'NO'}`);
+  console.log(`🔗 Permitted Client URL: ${process.env.CLIENT_URL || 'Not set yet'}`);
 });
