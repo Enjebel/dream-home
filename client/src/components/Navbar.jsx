@@ -1,20 +1,41 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import API from '../api';
 import { 
   Menu, X, Home as HomeIcon, Heart, 
-  PlusSquare, LayoutDashboard, LogOut, 
+  LayoutDashboard, LogOut, 
   MessageSquare, Building2, ChevronDown 
 } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread messages count for the logged-in user
+  const fetchUnreadCount = async () => {
+    if (!user) return;
+    try {
+      const { data } = await API.get('/inquiries/my-leads');
+      const pending = data.filter(msg => msg.status === 'pending').length;
+      setUnreadCount(pending);
+    } catch (err) {
+      console.error("Navbar count error", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    // Refresh count when location changes (user moves between pages)
+    setShowDropdown(false);
+    setIsOpen(false);
+  }, [user, location.pathname]);
 
   const handleCategoryClick = (category) => {
-    // Navigate to Home page with a query parameter
     navigate(`/?category=${category}`);
     setIsOpen(false);
   };
@@ -45,9 +66,15 @@ const Navbar = () => {
             <div className="relative">
               <button 
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-3 bg-slate-900 text-white pl-5 pr-3 py-3 rounded-2xl hover:bg-blue-600 transition-all shadow-xl shadow-blue-100/20"
+                className="flex items-center gap-3 bg-slate-900 text-white pl-5 pr-3 py-3 rounded-2xl hover:bg-blue-600 transition-all shadow-xl shadow-blue-100/20 relative"
               >
                 <span className="text-xs font-black uppercase tracking-widest">{user.name.split(' ')[0]}</span>
+                
+                {/* NOTIFICATION DOT ON BUTTON */}
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full animate-bounce"></span>
+                )}
+
                 <div className="bg-white/20 p-1 rounded-lg">
                   <ChevronDown size={14} />
                 </div>
@@ -55,26 +82,36 @@ const Navbar = () => {
 
               {showDropdown && (
                 <div className="absolute top-full right-0 mt-4 w-64 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-3 flex flex-col gap-1 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                  <Link to="/dashboard" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
+                  <Link to="/dashboard" className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
                     <LayoutDashboard size={18} className="text-gray-400 group-hover:text-blue-600" />
                     <span className="text-sm font-bold text-gray-700">Profile Dashboard</span>
                   </Link>
-                  <Link to="/my-properties" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
+                  <Link to="/my-properties" className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
                     <Building2 size={18} className="text-gray-400 group-hover:text-blue-600" />
                     <span className="text-sm font-bold text-gray-700">My Inventory</span>
                   </Link>
-                  <Link to="/inbox" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
-                    <MessageSquare size={18} className="text-gray-400 group-hover:text-blue-600" />
-                    <span className="text-sm font-bold text-gray-700">Messages</span>
+                  
+                  {/* MESSAGES WITH COUNT */}
+                  <Link to="/inbox" className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-2xl transition group">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare size={18} className="text-gray-400 group-hover:text-blue-600" />
+                      <span className="text-sm font-bold text-gray-700">Messages</span>
+                    </div>
+                    {unreadCount > 0 && (
+                      <span className="bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded-lg">
+                        {unreadCount}
+                      </span>
+                    )}
                   </Link>
-                  <Link to="/favorites" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
+
+                  <Link to="/favorites" className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-2xl transition group">
                     <Heart size={18} className="text-gray-400 group-hover:text-blue-600" />
                     <span className="text-sm font-bold text-gray-700">Favorites</span>
                   </Link>
                   <hr className="my-2 border-gray-50" />
                   <button 
-                    onClick={() => { logout(); setShowDropdown(false); }}
-                    className="flex items-center gap-3 p-4 hover:bg-red-50 text-red-500 rounded-2xl transition"
+                    onClick={logout}
+                    className="flex items-center gap-3 p-4 hover:bg-red-50 text-red-500 rounded-2xl transition w-full"
                   >
                     <LogOut size={18} />
                     <span className="text-sm font-bold">Sign Out</span>
@@ -91,8 +128,11 @@ const Navbar = () => {
         </div>
 
         {/* MOBILE MENU TOGGLE */}
-        <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)}>
+        <button className="md:hidden p-2 relative" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={28} /> : <Menu size={28} />}
+          {unreadCount > 0 && !isOpen && (
+            <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+          )}
         </button>
       </div>
 
@@ -106,7 +146,10 @@ const Navbar = () => {
           {user ? (
             <>
               <Link to="/my-properties" className="font-bold text-gray-600">My Inventory</Link>
-              <Link to="/inbox" className="font-bold text-gray-600">Messages</Link>
+              <Link to="/inbox" className="font-bold text-gray-600 flex items-center justify-between">
+                Messages 
+                {unreadCount > 0 && <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">{unreadCount}</span>}
+              </Link>
               <button onClick={logout} className="text-red-500 font-bold text-left">Sign Out</button>
             </>
           ) : (
